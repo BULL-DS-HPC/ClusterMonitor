@@ -1,0 +1,340 @@
+
+<!DOCTYPE html>
+
+	<head>
+	<meta charset="utf-8">
+	<title>ClusterMonitor</title>
+	<link rel="shortcut icon" href="favicon.ico">
+	<style type="text/css" title="currentStyle">
+       			@import "css/animate.css";
+       			@import "css/icomoon.css";
+       			@import "css/bootstrap.css";
+       			@import "css/style_black.min.css";
+       			@import "css/superfish.css";
+       			@import "css/magnific-popup.css";
+       			@import "css/style.css";
+	</style>
+
+	<script src="js/modernizr-2.6.2.min.js"></script>
+
+	</head>
+	<body>
+		<div id="fh5co-wrapper">
+		<div id="fh5co-page">
+	
+		<header id="fh5co-header-section" class="sticky-banner">
+			<div class="container">
+				<div class="nav-header">
+					<a href="#" class="js-fh5co-nav-toggle fh5co-nav-toggle dark"><i></i></a>
+					<h1 id="fh5co-logo"><a href="index.html">ClusterMonitor</a></h1>
+					<!-- START #fh5co-menu-wrap -->
+					<nav id="fh5co-menu-wrap" role="navigation">
+						<ul class="sf-menu" id="fh5co-primary-menu">
+							<li><a href="./index.html#fh5co-feature-product">Overview</a></li>
+							<li><a href="./index.html#fh5co-features">Plugins</a></li>
+							<li><a href="./index.html#fh5co-portfolio">Screenshots</a></li>
+							<li><a href="./index.html#fh5co-blog-section">Last News</a></li>
+							<li class="active"><a href="#fh5co-features">Installation</a></li>
+						</ul>
+					</nav>
+				</div>
+			</div>
+		</header>
+
+		<!-- end:header-top -->
+
+		<br>
+		<div id="fh5co-features">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-8 col-md-offset-2 text-center heading-section animate-box">
+						<h3>Process to install</h3>
+					</div>
+				</div>
+			</div>
+			<div class="container">
+				<div class="row row-bottom-padded-md">
+					<div class="col-lg-12 col-md-12 col-sm-12">
+						<div class="fh5co-blog animate-box">
+							<a href="#"><img class="img-responsive" src="images/cover_bg_1.jpg" alt=""></a>
+							<div class="blog-text">
+								<div class="prod-title">
+									<h3><a href=""#>A - Install interface web</a></h3>
+				
+									<p>- Download zip on github, extract and copy ClusterMonitor_web on your web directory( /var/www)</p>
+									<p>- Rename ClusterMonitor_web to clusterMonitor</p>
+										<p><code> $ mv  clusterMonitor</code></p>
+									<p>- Change right to www-data </p> 
+										<p><code> $ chown -R www-data. clusterMonitor</code></p>
+									<p>- Connect to your web serveur http://server/clustermonitor</p>
+									<p>- Create crontab fo history</p>
+									<p><code>00 */2 * * * php5 /var/www/cluster-monitor/cron/clean_dbd.php 1>/dev/null 2>&1</code></p>
+									<p>This definition is allowed for historical elements. The values are to be translated in the web interface under an administrator account</p>
+									<p>- Follow the instructions </p>
+									<p><img src="images/install1.jpg" height="100%" width="100%"></p>
+									<p><img src="images/install2.jpg" height="100%" width="100%"></p>
+									<p><img src="images/install3.jpg" height="100%" width="100%"></p>
+				
+
+									<h3><a href=""#>B - Install the collector on a cluster</a></h3>
+									
+									<p>- Download zip on github, extract and copy ClusterMonitor_Collecteur/srv/cluster_monitor on your prefer directory( /srv/cluster_monitor)</p>
+									<p>- Change rights to root ( chown -R root. clusterMonitor)</p>
+									<p>- Configure this collector</p>
+									<p>- Change variable WORK_DIR= on *.sh</p>
+									<code>	  
+									#!/bin/bash <br>
+ 									<br>
+									# Information : le cluster doit être d'abord insérer en base côté server<br>
+									# Paquets nécéssaire : 	ipmitool / clustershell	/ mysql-client / >= slurm 14.11.4<br>
+									# Autheur : Montagne Vincent / Gilbert Nicolas<br>
+									# Version : 1.5.2<br>
+									# Date : 06 octobre 2015<br>
+									# Mise à jour : 19 décembre 2016<br>
+									<br>
+									# --------------------- Definition des variables d'administration --------------------- #<br>
+									<br>
+									# Fichier de log.<br>
+									LOG_FILE="/var/log/clustermonitor.log"<br>
+									<br>
+									TEMP_DIR="${WORK_DIR}/tmp"<br>
+									if [[ ! -e ${TEMP_DIR} ]] ;then mkdir ${TEMP_DIR} ;fi<br>
+									<br>
+									TEMP_FILE_TOPO="${TEMP_DIR}/topology.txt"<br>
+									TEMP_FILE_NODE="${TEMP_DIR}/node.txt"<br>
+									TEMP_FILE_BDD="${TEMP_DIR}/bdd.txt"<br>
+									TEMP_FILE_CMD_QUOTA="${TEMP_DIR}/cmd_quota.txt"<br>
+									TEMP_FILE_BDD_TOPOCNS="${TEMP_DIR}/bddtopocns.txt"<br>
+									<br>
+									# Information de connexion à la base de données server.<br>
+									USERBDD="loginbdd"<br>
+									MDPBDD="passbdd"<br>
+									IPBDD=serverbdd<br>
+									PORTBDD=3306<br>
+									BDD="cluster_monitor"<br>
+									<br>
+									# Lock file<br>
+									LOCKFILE="${WORK_DIR}/cluster-monitor.lock"<br>
+									LOCKFILETOPOCNS="${WORK_DIR}/cluster-monitor-topocns.lock"<br>
+									<br>
+									# Console log<br>
+									OK="[\033[0;32mok\033[0m]"<br>
+									FAIL="[\033[0;31mFailed\033[0m]"<br>
+									FC="\033[0m"<br>
+									<br>
+									# Mise en place des remontées des Metrics des jobs ( yes or no )<br>
+									JOBSMETRICS="yes"<br>
+									<br>
+									# --------------------- Definition des variables de travail --------------------- #<br>
+									<br>
+									<br>
+									# Nom du cluster ( /!\ le nom doit être identique à celui en base de donnée côté server, respecter la case ).<br>
+									CLUSTER="clustername"<br>
+									<br>
+									# Nom du gestionnaire batch ( ex: "slurm" ).<br>
+									BATCHSCHEDULER="slurm"<br>
+										<br>
+										# Fichier conf slurm ( en cas de multicluster ).<br>
+										export SLURM_CONF="/etc/slurm-llnl/slurm.conf"<br>
+										# Nom de la partition slurm incluant tous les noeuds de calcul.<br>
+										PARTITION_CLUSTER="all"<br>
+										# Report wckeys yes/no<br>
+									        REPORTWCKEYS="no"<br>
+									<br>
+									# Systeme de fichiers a surveiller ( ex: "mount_point|scratch mount_point|home" ).<br>
+									FILESYSTEM="scratch|scratch home|home"<br>
+									<br>
+									# Liste Frontaux du cluster ( ex: "frontal1 frontal2" ).<br>
+									FRONTAUX="front1 front2 front3"<br>
+									<br>
+									# Liste des noeuds de services a surveiller.<br>
+									NOEUDS_SERVICE="front1[1-2] ldap[1-2] service[1-2]"<br>
+									<br>
+									# Ldap ( fonction collectUsers à commenté si non utilisé )<br>
+									# Nom du serveur Ldap ( slapcat via ssh ) pour recuperer les informations des utilisateurs <br>
+									SRVLDAP="ldap1" <br>
+									# Liste des groupes des utilisateurs du cluster ( ex: "groupe1 groupe2" ).<br>
+									GROUPE="users-esculape"<br>
+									OUGROUPE="ou=groups,dc=esculape,dc=org,dc=fr"<br>
+									<br>
+									# wrapping de commande<br>
+									MYSQL="mysql -h ${IPBDD} -P ${PORTBDD} -u${USERBDD} -p${MDPBDD} -D ${BDD} -N -e"<br>
+									MYSQL_FILE="mysql -h ${IPBDD} -P ${PORTBDD} -u${USERBDD} -p${MDPBDD} -D ${BDD} -N "<br>
+									DF="timeout -s 9 5s df"<br>
+									CMDVDGB="sinfo -V > /dev/null 2>&1" 		# Commande de vérification de la disponibilitée du gestionnaire de batch<br>
+									CMDCONFGB="scontrol show config"		# Commande de récupération configuration du gestionnaire de batch<br>
+									CMDVGB="sinfo --version  | awk '{print$2}'"	# Commande de récupération version du gestionnaire de batch<br>
+									CMDLQOS="sacctmgr -P -n list qos format=Name,Priority,GrpJobs,GrpSubmit,MaxJobs,MaxCPUs,MaxNodes,MaxWall"	# Commande de récupération configuration des qos<br>
+									<br>
+									# Quota xfs ( COLLECTQUOTAXFS="yes/no" )<br>
+									# Noeud permettant de recuperer l'ensemble des quotas xfs + volume et nom fs (vghome1|name1|type1 vghome2|name2|type2)<br>
+									# Type = p project, u user, g group<br>
+									COLLECTQUOTAXFS="yes"<br>
+									SRVNFS="servnfs"<br>
+									VOLFSXFS="mntpoint|home|p"<br>
+									<br>
+									# Quota gpfs ( COLLECTQUOTAGPFS="yes/no" )<br>
+									# Noeud permettant de recuperer l'ensemble des quotas gpfs + volume et nom fs (vghome1|name1 vghome2|name2)<br>
+									COLLECTQUOTAGPFS="yes"<br>
+									SRVGPFS="srvgpfs"<br>
+									VOLFSGPFS="/dev/gpfsstore:store|store"<br>
+									<br>
+									# Quota lustre ( COLLECTQUOTALUSTRE="yes/no" )<br>
+									# Noeud permettant de recuperer l'ensemble des quotas lustre + volume et nom fs (vghome1|name1 vghome2|name2)<br>
+									COLLECTQUOTALUSTRE="yes"<br>
+									SRVLUSTRE="srvlustre"<br>
+									VOLLUSTRE="/scratch|scratch"<br>
+									</code>
+
+									<p>- Extract and copy cluster_monitor service /etc/init.d/cluster_monitor on your directory( /etc/init.d/)</p>
+									<p>- Change rights to root ( chown -R root. cluster_monitor)</p>
+									<p>- Run this service</p>
+									<p><code>/etc/init.d/cluster_monitor start</code></p>
+									<p>* Working script : </p>
+									<p><img src="images/sh.png" height="80%" width="80%"></p>
+									<p>* Reglagle workflow with this function in cluster_monitor.sh : </p>
+									<p><code>function dateDiff ()<br>
+										{<br>
+										  case $1 in<br>
+										  -s)   sec=1;      shift;;<br>
+										  -m)   sec=60;     shift;;<br>
+										  -h)   sec=3600;   shift;;<br>
+										  -d)   sec=86400;  shift;;<br>
+										   *)    sec=86400;;<br>
+										  esac<br>
+										  dte1=$1<br>
+										  dte2=$2<br>
+										  diffSec=$((dte2-dte1))<br>
+										  if ((diffSec < 0)); then abs=-1; else abs=1; fi<br>
+										  echo $((diffSec/sec*abs))<br>
+										  }<br>
+									</code></p>
+									<p> with in principale program</p>
+									<p><code>
+									while true<br>
+									do<br>
+									  if [[ $(dateDiff -d "${DATE_RUN_CONFIG}" "$(date "+%s")") > 5 ]]<br>
+									  then<br>
+									    CONFIG=1<br>
+									    DATE_RUN_CONFIG=$(date "+%s")<br>
+									  fi<br><br>
+
+									  if [[ $(dateDiff -d "${DATE_RUN_TOPOLOGY}" "$(date "+%s")") > 3 ]]<br>
+									  then<br>
+									    TOPOLOGY=1<br>
+									    DATE_RUN_TOPOLOGY=$(date "+%s")<br>
+									  fi<br><br>
+
+									  if [[ $(dateDiff -m "${DATE_RUN_COLLECTE}" "$(date "+%s")") > 10 ]]<br>
+									  then<br>
+									    COLLECTE=1<br>
+									    DATE_RUN_COLLECTE=$(date "+%s")<br>
+									  fi<br><br>
+
+									  if [[ "${CONFIG}" == 1 || "${TOPOLOGY}" == 1 || "${COLLECTE}" == 1 ]]<br>
+									  then<br>
+									    testgestionnairebatch<br>
+									    if [[ "$?" == 0 ]]<br>
+									    then<br>
+									      getFrontalToUse<br>
+									      if [[ "$?" == 0 ]]<br>
+									      then<br>
+									        prepBDD<br>
+										if [[ "${RESETCONFIG}" == 1 ]]<br>
+										then<br>
+											CONFIG=1<br>
+											COLLECTE=1<br>
+										fi<br>
+									        if [[ "${CONFIG}" == 1 && "${COLLECTE}" == 1 ]]<br>
+									        then<br>
+									          echo -e "Reload config cluster" >> ${LOG_FILE}<br>
+									          delConfigBDD<br>
+									          collectUsers<br>
+									          configFrontaux<br>
+									          configClusters<br>
+									          configFilesystems<br>
+									          configQOS<br>
+									          configPartitions<br>
+									          if [[ "${REPORTWCKEYS}" == "yes" ]]   ;then configWckey ;fi<br>
+									          collectRapport<br>
+									          CONFIG=0<br>
+									        fi<br><br>
+      
+									        if [[ "${TOPOLOGY}" == 1 && "${COLLECTE}" == 1 ]]<br>
+									        then<br>
+										  ${WORK_DIR}/cluster_monitor_topocns.sh &<br>
+									          TOPOLOGY=0<br>
+									        fi<br><br>
+        
+									        if [[ "${COLLECTE}" == 1 ]]<br>
+									        then<br>
+									          delCollecteBDD<br>
+										  collectFS<br>
+										  if [[ "${COLLECTQUOTAXFS}" == "yes" ]]   ;then collectQuotaXfs    ;fi<br>
+										  if [[ "${COLLECTQUOTAGPFS}" == "yes" ]]  ;then collectQuotaGpfs   ;fi	<br>	
+										  if [[ "${COLLECTQUOTALUSTRE}" == "yes" ]];then collectQuotaLustre ;fi	<br>	
+									          collectJobs<br>
+									          collectNodes<br>
+									          collectPartitions<br>
+									          collectClusters<br>
+									          collectFrontaux<br>
+									          collectReservation<br>
+									          COLLECTE=0<br>
+									        fi<br>
+									        sendBDD <br>
+									      fi<br>
+									    fi<br>
+									  fi<br><br>
+
+									  sleep 1m<br>
+									done<br>
+									</code></p>
+									<p>* You can test all funtion  : </p>
+									<p><img src="images/help.png" height="100%" width="100%"></p>
+									<br><br>
+
+
+								</div>
+							</div> 
+						</div>
+					</div>
+					<div class="clearfix visible-md-block"></div>
+				</div>
+
+			</div>
+		</div>
+		<!-- fh5co-blog-section -->
+		<footer>
+			<div id="footer">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-6 col-md-offset-3 text-center">
+							<p>Copyright 2016 ClusterMonitor</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</footer>
+
+	
+
+	</div>
+
+	</div>
+
+
+	<script src="js/jquery.min.js"></script>
+	<script src="js/jquery.easing.1.3.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/jquery.waypoints.min.js"></script>
+	<script src="js/sticky.js"></script>
+	<script src="js/jquery.stellar.min.js"></script>
+	<script src="js/hoverIntent.js"></script>
+	<script src="js/superfish.js"></script>
+	<script src="js/jquery.magnific-popup.min.js"></script>
+	<script src="js/magnific-popup-options.js"></script>
+	<script src="js/main.js"></script>
+
+	</body>
+</html>
+
