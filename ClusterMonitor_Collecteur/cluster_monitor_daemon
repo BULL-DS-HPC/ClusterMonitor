@@ -1,0 +1,64 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:             cluster_monitor
+# Required-Start:       $network sshd 
+# Required-Stop:        $network
+# Default-Start:        2 3 4 5
+# Default-Stop:         0 1 6
+# Short-Description:    cluster_monitor
+### END INIT INFO
+
+export LANG=C
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+PATHINST=/srv/cluster_monitor
+DESC="Client cluster monitor"
+NAME=cluster_monitor_daemon
+DAEMON=$PATHINST/cluster_monitor.sh
+DAEMON_ARGS=""
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+LOCKFILE=$PATHINST/cluster-monitor.lock
+
+. /lib/init/vars.sh
+. /lib/lsb/init-functions
+
+do_start() {
+	if [[ -f "${LOCKFILE}" ]];then
+        	echo -e ""
+        	echo -e " Error fichier de lock présent => ${LOCKFILE}"
+        	echo -e ""
+        	exit 1
+	fi	
+        start-stop-daemon --start --quiet --background --make-pidfile --pidfile $PIDFILE --oknodo --verbose --exec $DAEMON --$DAEMON_ARGS 
+}
+do_stop() {
+	start-stop-daemon --stop --quiet --signal TERM --oknodo --verbose --pidfile $PIDFILE || exit 1 
+        rm -f $PIDFILE
+}
+
+case "$1" in
+
+start)
+	log_daemon_msg "Starting cluster_monitor: "
+        do_start
+        ;;
+stop)
+	log_daemon_msg "Stopping cluster_monitor: "
+        do_stop
+        ;;
+restart)
+	log_daemon_msg "Restarting cluster_monitor: "
+	do_stop
+	sleep 1
+	do_start
+	;;
+status)
+        status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+        ;;
+*)
+        echo "usage: $0 {start|stop|restart|status}" >&2
+        exit 1
+        ;;
+esac
+exit 0
+

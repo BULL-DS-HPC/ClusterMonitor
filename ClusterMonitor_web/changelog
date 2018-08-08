@@ -1,0 +1,40 @@
+
+# Changelog
+
+
+## To come up in dev [1.5.6]
+- add script in postinstall service cluster_mmonitor for systemctl
+- add vue off evolution fs
+- add Sauvegarde report TSM
+- add information d'activaty metrics for tendance/usage and wait J+1
+- add recup all events and jobs reports
+- add recup hard conf with ipmitool if dmidecode is out
+- add lock file for crontab
+- add diff config hard VM ou PHYSICAL
+- add auto update mysql structure table with update version
+
+## [1.5.5] - 2018-06-12
+### Added
+- add posibility to clean all data for a cluster suppress
+- add type off speed network Infiniband or Opa
+- modify view pages jobs
+- hide Pages Jobs Metrics is off in ClusterMonitor_Collector
+- add % usage in quota pages
+- optimisation Tables Mysql
+- add information slurm configuration in configuration pages
+- correct bug recup information hardware node
+
+## [1.5.4] - 2018-03-30
+### Added
+- modify users connect mysql by mysqli
+- maj de numero of version auto via config file + sup champs in databases
+- maj date update auto in databases via config file
+- add readme for example for create mysql ssl-cert 
+- possibility activate ssl for echange client server on mariadb
+- correct users.php view only users when cluster is active 
+
+## [1.5.3] - 2017-11-22
+### Added
+- add retention data and archivage Collect_Clusters, Collect_Frontaux, Collect_FS, Collect_nodes, Collect_partitions, Jobs_Metrics
+- add file crontab for archivage
+- add possibility change by administrators in gui
