@@ -1,0 +1,59 @@
+/*--------------------------------------------------------------------------------------
+                                Active ssl on mariadb
+----------------------------------------------------------------------------------------*/
+
+active ssl on mariadb server
+----------------------------
+
+file /etc/mysql/mariadb.conf.d/50-server.cnf
+
+[mysqld]
+...
++ ssl-ca=/etc/mysql/ssl/ca-cert.pem
++ ssl-cert=/etc/mysql/ssl/server-cert.pem
++ ssl-key=/etc/mysql/ssl/server-key.pem
++ ssl=on
+
+systemctl restart mariadb.service
+
+verif -> MariaDB [(none)]> show variables LIKE "%ssl%";
++---------------------+--------------------------------+
+| Variable_name       | Value                          |
++---------------------+--------------------------------+
+| have_openssl        | NO                             |
+| have_ssl            | YES                            |
+| ssl_ca              | /etc/mysql/ssl/ca-cert.pem     |
+| ssl_capath          |                                |
+| ssl_cert            | /etc/mysql/ssl/server-cert.pem |
+| ssl_cipher          |                                |
+| ssl_crl             |                                |
+| ssl_crlpath         |                                |
+| ssl_key             | /etc/mysql/ssl/server-key.pem  |
+| version_ssl_library | YaSSL 2.4.2                    |
++---------------------+--------------------------------+
+10 rows in set (0.01 sec)
+
+
+mariadb server
+----------------
+
+openssl genrsa 4096 > ca-key.pem
+openssl req -sha1 -new -x509 -nodes -days 3650 -key ca-key.pem -subj "/C=FR/ST=France/L=Bruyere-le-chatel/O=Bull/OU=sc-xxx/CN=infrabull/emailAddress=xxxxxxxx@xxxxx.fr" > ca-cert.pe
+
+openssl req -sha1 -newkey rsa:4096 -days 3650 -nodes -keyout server-key.pem > server-req.pem 
+openssl rsa -in server-key.pem -out server-key.pem
+openssl x509 -sha1 -req -in server-req.pem -days 3650 -CA ca-cert.pem -CAkey ca-key.pem -set_serial 01 > server-cert.pem
+
+mariadb client 
+----------------
+
+openssl req -sha1 -newkey rsa:4096 -days 3650 -nodes -keyout client-key.pem -subj "/C=FR/ST=France/L=Bruyere-le-chatel/O=Bull/OU=sc-xxx/CN=Lot1People/emailAddress=xxxxxxxx@xxxxx.fr" > client-req.pe
+openssl rsa -in client-key.pem -out client-key.pem
+openssl x509 -sha1 -req -in client-req.pem -days 3650 -CA ../ca-cert.pem -CAkey ../ca-key.pem -set_serial 01 > client-cert.pem
+
+copie ca-cert.pem  client-key.pem client-cert.pem on client and configure client
+
+[client]
++ ssl-cert=/etc/mysql/ssl/client-cert.pem
++ ssl-key=/etc/mysql/ssl/client-key.pem
+
